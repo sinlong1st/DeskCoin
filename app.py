@@ -19,6 +19,70 @@ CHECK_INTERVAL_SEC = 2  # how often we check (sleeptime)
 REFRESH_THRESHOLD_SEC = 30
 REFRESH_THRESHOLD_COUNT = REFRESH_THRESHOLD_SEC // CHECK_INTERVAL_SEC
 
+class PriceFetcher(QThread):
+    update_price = pyqtSignal(str)
+
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+        self.running = True
+
+    def run(self):
+        try:
+            logging.info("[Fetcher] Starting WebDriver...")
+            with SB(uc=True, headed=True, headless=True) as driver:
+                driver.driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+                    "source": """
+                        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+                        window.chrome = { runtime: {} };
+                        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+                        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+                    """
+                })
+                driver.open(self.url)
+                time.sleep(5)
+
+                UNCHANGED_COUNT = 0
+                PREVIOUS_PRICE = None
+
+                while self.running:
+                    try:
+                        raw_text = driver.get_text("//span[contains(@class,'priceWrapper')]")
+                        logging.info(f"[Fetcher] Raw text: {raw_text}")
+                        price = raw_text.strip().splitlines()[0]
+
+                        self.update_price.emit(price)
+                        self.print_memory()
+
+                        if price == PREVIOUS_PRICE:
+                            UNCHANGED_COUNT += 1
+                        else:
+                            UNCHANGED_COUNT = 0
+
+                        PREVIOUS_PRICE = price
+
+                        if UNCHANGED_COUNT >= REFRESH_THRESHOLD_COUNT:
+                            logging.warning("[Fetcher] Price stuck. Refreshing page...")
+                            driver.refresh()
+                            time.sleep(5)
+                            UNCHANGED_COUNT = 0
+
+                    except Exception as e:
+                        logging.error(f"[Fetcher] Error during fetch: {e}")
+                        self.update_price.emit("Loading...")
+
+                    time.sleep(CHECK_INTERVAL_SEC)
+
+        except Exception as e:
+            logging.error(f"[Fetcher] Thread crashed: {e}")
+        finally:
+            logging.info("[Fetcher] Exiting thread")
+
+    def stop(self):
+        logging.info("[Fetcher] Stopping thread...")
+        self.running = False
+        self.quit()
+        self.wait()
 
 
 class PriceWindow(QWidget):
