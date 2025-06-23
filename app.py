@@ -1,0 +1,122 @@
+import sys
+import time
+import logging
+import os
+import psutil
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton
+)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from seleniumbase import SB
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
+CHECK_INTERVAL_SEC = 2  # how often we check (sleeptime)
+REFRESH_THRESHOLD_SEC = 30
+REFRESH_THRESHOLD_COUNT = REFRESH_THRESHOLD_SEC // CHECK_INTERVAL_SEC
+
+
+
+class PriceWindow(QWidget):
+    def __init__(self, url):
+        super().__init__()
+
+        self.memory_label = QLabel("Memory: -- MB", self)
+        self.memory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.memory_label.setStyleSheet("font-size: 14px; color: #666;")
+
+        self.setWindowTitle("🌟 Real-time SOL Tracker")
+        self.setGeometry(300, 300, 400, 150)
+        self.previous_price = None
+        self.last_update_time = time.time()
+
+        self.label = QLabel("Fetching value...", self)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label.setStyleSheet("font-size: 28px; font-weight: bold; color: #333;")
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.addWidget(self.label)
+        layout.addWidget(self.memory_label)
+
+        self.setLayout(layout)
+        self.setStyleSheet("background-color: #f8f8f8; border-radius: 10px;")
+
+        self.url = url
+        self.start_fetcher()
+
+        self.watchdog = QTimer()
+        self.watchdog.timeout.connect(self.check_timeout)
+        self.watchdog.start(10000)  # every 10 seconds
+
+    def start_fetcher(self):
+        logging.info("[UI] Launching fetcher thread")
+        self.fetcher = PriceFetcher(self.url)
+        self.fetcher.update_price.connect(self.update_label)
+        self.fetcher.start()
+
+    def restart_fetcher(self):
+        self.fetcher.stop()
+        self.start_fetcher()
+
+    def check_timeout(self):
+        if time.time() - self.last_update_time > 30:
+            logging.warning("[Watchdog] No price update in 30s. Restarting thread.")
+            self.restart_fetcher()
+
+    def update_label(self, price_str):
+        self.last_update_time = time.time()
+        self.update_memory()
+        try:
+            current_price = float(price_str.replace(",", ""))
+            if self.previous_price is not None:
+                color = "green" if current_price > self.previous_price else "red" if current_price < self.previous_price else "#333"
+            else:
+                color = "#333"
+            self.label.setStyleSheet(f"font-size: 28px; font-weight: bold; color: {color};")
+            self.label.setText(f"Tracking Value: {price_str}")
+            self.previous_price = current_price
+        except Exception:
+            self.label.setText("Tracking Value: ?")
+
+    def update_memory(self):
+        process = psutil.Process(os.getpid())
+        mem_mb = process.memory_info().rss / 1024 ** 2
+        self.memory_label.setText(f"Memory: {mem_mb:.2f} MB")
+
+    def closeEvent(self, event):
+        self.fetcher.stop()
+        self.watchdog.stop()
+        event.accept()
+
+class UrlPrompt(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Enter Trading URL")
+        self.setGeometry(300, 300, 400, 100)
+        self.input = QLineEdit(self)
+        self.input.setPlaceholderText("Paste TradingView URL here...")
+        self.button = QPushButton("Start", self)
+        self.button.clicked.connect(self.launch_price_window)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.input)
+        layout.addWidget(self.button)
+        self.setLayout(layout)
+
+    def launch_price_window(self):
+        url = self.input.text()
+        if url:
+            self.hide()
+            self.price_window = PriceWindow(url)
+            self.price_window.show()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    prompt = UrlPrompt()
+    prompt.show()
+    sys.exit(app.exec())
