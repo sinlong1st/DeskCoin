@@ -1,4 +1,10 @@
-# 💸 Real-Time Coin Price Tracker  
+# Real-Time Coin Price Tracker  
+![Python](https://img.shields.io/badge/Python-3.9-blue)
+![SeleniumBase](https://img.shields.io/badge/SeleniumBase-Automation-yellow)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Status](https://img.shields.io/badge/status-WIP-orange)
+![Last Updated](https://img.shields.io/badge/last%20update-July%202025-blue)
+
 *A sneaky little desktop app to track crypto without blowing your cover at work 👀*
 
 <div align="">
@@ -7,7 +13,7 @@
     <img src="./assets/media/demo_3.png" alt="Description" style="display:block; width:100%; max-width:600px; margin-bottom:10px;"/>
 </div>
 
-## 🎯 Why This Exists
+## Why This Exists
 
 Let’s be honest.
 
@@ -28,7 +34,7 @@ No tabs. No suspicious site logos. No judgment. Just the price.
 
 ---
 
-## 🧠 Features
+## Features
 
 - ✅ Real-time coin price fetching (with anti-bot stealth mode)
 - 🧠 RAM usage monitor (to prove it’s *not* mining… probably)
@@ -38,7 +44,7 @@ No tabs. No suspicious site logos. No judgment. Just the price.
 - 💸 **No tokens, no API keys, no signup – just open it and go.**
 
 ---
-## 📈 Ideal Use Cases
+## Ideal Use Cases
 - Your boss walks in, and you instantly alt-tab to your “memory monitor”
 
 - You're on guest Wi-Fi and want to avoid Binance in browser
@@ -53,16 +59,17 @@ No tabs. No suspicious site logos. No judgment. Just the price.
 Use responsibly... or irresponsibly, I’m not your financial advisor.
 ---
 
-## 🛠️ Built With
+## Built With
 
 - **PyQt6** – sleek UI
 - **SeleniumBase** – scrapes your coin price like a ninja
 - **pyqtgraph** – makes squiggly lines go up (or down… sorry)
 - **psutil** – monitors how much RAM your guilt consumes
+- **pyqtgraph** – for graphs and charts
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 - Python 3.9+
 - Chrome browser
@@ -74,7 +81,7 @@ Install the packages:
 pip install -r requirements.txt
 ```
 
-## 🤓 How It Works
+## How It Works
 - Paste your favorite TradingView URL
 
 - The app scrapes the current price in the background (no APIs used!)
@@ -83,7 +90,7 @@ pip install -r requirements.txt
 
 - Auto-refreshes the page if the price doesn’t change (no stale coins here!)
 
-## 🤔 Future (aka TODO if we feel like it)
+## Future (aka TODO if we feel like it)
 - Add price alerts with subtle beeps (or fake Slack pings)
 
 - Dark mode to match your soul when the market dips
