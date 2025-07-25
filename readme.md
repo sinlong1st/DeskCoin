@@ -1,7 +1,11 @@
 # 💸 Real-Time Coin Price Tracker  
 *A sneaky little desktop app to track crypto without blowing your cover at work 👀*
 
----
+<div align="">
+    <img src="./assets/media/demo_2.png" alt="Description" style="display:block; width:100%; max-width:600px; margin-bottom:10px;"/>
+    <img src="./assets/media/demo_1.png" alt="Description" style="display:block; width:100%; max-width:600px; margin-bottom:10px;"/>
+    <img src="./assets/media/demo_3.png" alt="Description" style="display:block; width:100%; max-width:600px; margin-bottom:10px;"/>
+</div>
 
 ## 🎯 Why This Exists
 

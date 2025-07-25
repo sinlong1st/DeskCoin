@@ -94,7 +94,7 @@ class PriceFetcher(QThread):
 class PriceWindow(QWidget):
     def __init__(self, url):
         super().__init__()
-        self.setWindowTitle("🌟 Real-time SOL Tracker")
+        self.setWindowTitle("🛠️ Real-time memory Tracker")
         self.setGeometry(300, 300, 400, 300)
         self.previous_price = None
         self.last_update_time = time.time()
@@ -115,7 +115,7 @@ class PriceWindow(QWidget):
         self.plot_curve = self.plot_widget.plot(self.price_history, pen='b')
         self.plot_widget.setBackground('#f8f8f8')
         self.plot_widget.setYRange(0, 1000)
-        self.plot_widget.setTitle("Price Trend")
+        self.plot_widget.setTitle("Usage Trend")
 
         # Layout
         layout = QVBoxLayout()
