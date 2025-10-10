@@ -16,9 +16,7 @@
 Latency: ~1-3 seconds (depends on your internet and TradingView load time)
 
 <p align="center">
-  <a href="https://youtu.be/F_plZaDNuAE">
-    <img src="https://img.youtube.com/vi/F_plZaDNuAE/0.jpg" alt="Watch the demo" width="600">
-  </a>
+  <img src="assets/media/performance.gif" alt="App Demo" width="600">
 </p>
 
 ## Why This Exists
