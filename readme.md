@@ -13,6 +13,14 @@
     <img src="./assets/media/demo_3.png" alt="Description" style="display:block; width:100%; max-width:600px; margin-bottom:10px;"/>
 </div>
 
+Latency: ~1-3 seconds (depends on your internet and TradingView load time)
+
+<p align="center">
+  <a href="https://youtu.be/F_plZaDNuAE">
+    <img src="https://img.youtube.com/vi/F_plZaDNuAE/0.jpg" alt="Watch the demo" width="600">
+  </a>
+</p>
+
 ## Why This Exists
 
 Let’s be honest.
