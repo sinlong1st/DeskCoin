@@ -3,6 +3,7 @@ import time
 import logging
 import os
 import psutil
+import pyqtgraph as pg
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton
 )
@@ -15,7 +16,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
-CHECK_INTERVAL_SEC = 2  # how often we check (sleeptime)
+CHECK_INTERVAL_SEC = 2
 REFRESH_THRESHOLD_SEC = 30
 REFRESH_THRESHOLD_COUNT = REFRESH_THRESHOLD_SEC // CHECK_INTERVAL_SEC
 
@@ -89,28 +90,39 @@ class PriceFetcher(QThread):
         mem_mb = process.memory_info().rss / 1024 ** 2
         logging.debug(f"[Memory] Using {mem_mb:.2f} MB")
 
+
 class PriceWindow(QWidget):
     def __init__(self, url):
         super().__init__()
-
-        self.memory_label = QLabel("Memory: -- MB", self)
-        self.memory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.memory_label.setStyleSheet("font-size: 14px; color: #666;")
-
-        self.setWindowTitle("🌟 Real-time SOL Tracker")
-        self.setGeometry(300, 300, 400, 150)
+        self.setWindowTitle("🛠️ Real-time memory Tracker")
+        self.setGeometry(300, 300, 400, 300)
         self.previous_price = None
         self.last_update_time = time.time()
+        self.price_history = []
 
+        # Price Label
         self.label = QLabel("Fetching value...", self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setStyleSheet("font-size: 28px; font-weight: bold; color: #333;")
 
+        # Memory Label
+        self.memory_label = QLabel("Memory: -- MB", self)
+        self.memory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.memory_label.setStyleSheet("font-size: 14px; color: #666;")
+
+        # Chart
+        self.plot_widget = pg.PlotWidget()
+        self.plot_curve = self.plot_widget.plot(self.price_history, pen='b')
+        self.plot_widget.setBackground('#f8f8f8')
+        self.plot_widget.setYRange(0, 1000)
+        self.plot_widget.setTitle("Usage Trend")
+
+        # Layout
         layout = QVBoxLayout()
         layout.setContentsMargins(30, 30, 30, 30)
         layout.addWidget(self.label)
         layout.addWidget(self.memory_label)
-
+        layout.addWidget(self.plot_widget)
         self.setLayout(layout)
         self.setStyleSheet("background-color: #f8f8f8; border-radius: 10px;")
 
@@ -119,7 +131,7 @@ class PriceWindow(QWidget):
 
         self.watchdog = QTimer()
         self.watchdog.timeout.connect(self.check_timeout)
-        self.watchdog.start(10000)  # every 10 seconds
+        self.watchdog.start(10000)
 
     def start_fetcher(self):
         logging.info("[UI] Launching fetcher thread")
@@ -148,6 +160,13 @@ class PriceWindow(QWidget):
             self.label.setStyleSheet(f"font-size: 28px; font-weight: bold; color: {color};")
             self.label.setText(f"Tracking Value: {price_str}")
             self.previous_price = current_price
+
+            # Update chart
+            self.price_history.append(current_price)
+            if len(self.price_history) > 50:
+                self.price_history.pop(0)
+            self.plot_curve.setData(self.price_history)
+
         except Exception:
             self.label.setText("Tracking Value: ?")
 
@@ -160,6 +179,7 @@ class PriceWindow(QWidget):
         self.fetcher.stop()
         self.watchdog.stop()
         event.accept()
+
 
 class UrlPrompt(QWidget):
     def __init__(self):
@@ -182,6 +202,7 @@ class UrlPrompt(QWidget):
             self.hide()
             self.price_window = PriceWindow(url)
             self.price_window.show()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
