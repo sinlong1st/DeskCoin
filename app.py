@@ -5,7 +5,7 @@ import os
 import psutil
 import pyqtgraph as pg
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton
+    QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton, QComboBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from seleniumbase import SB
@@ -186,9 +186,23 @@ class UrlPrompt(QWidget):
         super().__init__()
         self.setWindowTitle("Enter Trading URL")
         self.setGeometry(300, 300, 400, 100)
-        self.input = QLineEdit(self)
+        # self.input = QLineEdit(self)
+
+        self.input = QComboBox()
+        self.input.setEditable(True)  # allows free text entry
+
         self.input.setPlaceholderText("Paste TradingView URL here...")
-        self.input.setText("https://www.tradingview.com/chart/?symbol=COINBASE%3ASOLUSD")
+
+        # Add default options
+        default_urls = [
+            "https://www.tradingview.com/chart/?symbol=COINBASE%3ASOLUSD",
+            "https://www.tradingview.com/chart/?symbol=COINBASE%3ABTCUSD",
+            "https://www.tradingview.com/chart/?symbol=COINBASE%3AETHUSD"
+        ]
+        self.input.addItems(default_urls)
+        # Optional: set a default display value (still editable)
+        self.input.setCurrentText(default_urls[0])
+
         self.button = QPushButton("Start", self)
         self.button.clicked.connect(self.launch_price_window)
 
@@ -198,7 +212,7 @@ class UrlPrompt(QWidget):
         self.setLayout(layout)
 
     def launch_price_window(self):
-        url = self.input.text()
+        url = self.input.currentText()
         if url:
             self.hide()
             self.price_window = PriceWindow(url)
