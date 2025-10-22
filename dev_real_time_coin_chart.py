@@ -188,6 +188,7 @@ class UrlPrompt(QWidget):
         self.setGeometry(300, 300, 400, 100)
         self.input = QLineEdit(self)
         self.input.setPlaceholderText("Paste TradingView URL here...")
+        self.input.setText("https://www.tradingview.com/chart/?symbol=COINBASE%3ASOLUSD")
         self.button = QPushButton("Start", self)
         self.button.clicked.connect(self.launch_price_window)
 
